@@ -68,6 +68,7 @@ typedef long sph_s64;
 #define SPH_ECHO_64 1
 #define SPH_KECCAK_64 1
 #define SPH_JH_64 1
+#define SPH_SMALL_FOOTPRINT_JH 1
 #define SPH_SIMD_NOCOPY 0
 #define SPH_KECCAK_NOCOPY 0
 #define SPH_COMPACT_BLAKE_64 0
@@ -281,7 +282,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -323,7 +324,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -379,16 +380,22 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
     m[13] = 0; g[13] = m[13] ^ H[13];
     m[14] = 0; g[14] = m[14] ^ H[14];
     m[15] = 0x100000000000000; g[15] = m[15] ^ H[15];
+    int groestl_step = 0;
+groestl_perm:
     PERM_BIG_P(g);
+    if (groestl_step == 1) goto groestl_end;
+    groestl_step = 1;
     PERM_BIG_Q(m);
     for (unsigned int u = 0; u < 16; u ++)
       H[u] ^= g[u] ^ m[u];
-    sph_u64 xH[16];
+//    sph_u64 xH[16];
     for (unsigned int u = 0; u < 16; u ++)
-      xH[u] = H[u];
-    PERM_BIG_P(xH);
+      g[u] = H[u];
+    goto groestl_perm;
+//    PERM_BIG_P(xH);
+groestl_end:
     for (unsigned int u = 0; u < 16; u ++)
-      H[u] ^= xH[u];
+      H[u] ^= g[u];
     for (unsigned int u = 0; u < 8; u ++)
       hash.h8[u] = (dec ? (H[u + 8]) : hash.h8[u]);
   }
@@ -1035,7 +1042,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1077,7 +1084,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1785,7 +1792,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -1827,7 +1834,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -2001,16 +2008,22 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
     m[13] = 0; g[13] = m[13] ^ H[13];
     m[14] = 0; g[14] = m[14] ^ H[14];
     m[15] = 0x100000000000000; g[15] = m[15] ^ H[15];
+    int groestl_step = 0;
+groestl_perm1:
     PERM_BIG_P(g);
+    if (groestl_step == 1) goto groestl_end1;
+    groestl_step = 1;
     PERM_BIG_Q(m);
     for (unsigned int u = 0; u < 16; u ++)
       H[u] ^= g[u] ^ m[u];
-    sph_u64 xH[16];
+//    sph_u64 xH[16];
     for (unsigned int u = 0; u < 16; u ++)
-      xH[u] = H[u];
-    PERM_BIG_P(xH);
+      g[u] = H[u];
+    goto groestl_perm1;
+//    PERM_BIG_P(xH);
+groestl_end1:
     for (unsigned int u = 0; u < 16; u ++)
-      H[u] ^= xH[u];
+      H[u] ^= g[u];
     for (unsigned int u = 0; u < 8; u ++)
       hash.h8[u] = (H[u + 8]);
   }
@@ -2125,7 +2138,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
@@ -2167,7 +2180,7 @@ __kernel void search(__global unsigned char* block, volatile __global uint* outp
   n6 ^= h6;
   n7 ^= h7;
 
-  #pragma unroll 10
+  //#pragma unroll 10
   for (unsigned r = 0; r < 10; r ++)
   {
     sph_u64 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
